@@ -1,25 +1,104 @@
-import logo from './logo.svg';
-import './App.css';
+import {
+  RouterProvider,
+  createBrowserRouter,
+  redirect,
+} from "react-router-dom";
+import { Layout } from "./compoents/Layout";
+import { LoginPage, SignupPage} from "./compoents/pages/index";
+import ErrorPage from "./compoents/pages/404ErrorPage";
+import { useSelector } from "react-redux";
+import Loading from "./compoents/Layout/Loading";
+import { Home } from "./compoents/pages/home";
+import { Admin } from "./compoents/pages/admin";
+import { CreateUser } from "./compoents/pages/admin/users";
 
-function App() {
+
+export default function App() {
+  const user  = useSelector((state) => state.authentication);
+  const router = createBrowserRouter([
+    {
+      id: "root",
+      path: "/",
+      loader() {
+        return { user: user };
+      },
+      Component: Layout,
+  
+      children: [
+        {
+          index: true,
+          loader: protectedLoader,
+          Component: Home,
+        },
+        {
+          path: "login",
+          Component: LoginPage,
+        },
+        {
+          path: "register",
+          Component: SignupPage,
+        },
+        // {
+        //   path: "/user",
+        //   loader: protectedLoader,
+        //   Component: CreateUser,
+        //   children: [
+        //     {
+        //       // path: "/create",
+        //       // loader: protectedLoader,
+        //       // Component: CreateUser,
+        //     },
+        //     {
+        //       // path: "/:id/delete/",
+        //       // loader: protectedLoader,
+        //       // Component: DeleteUser,
+        //     },
+        //     // Add more children routes as needed
+        //   ],
+        // },
+        {
+          path: "protected",
+          loader: protectedLoader,
+          Component: Admin,
+        },
+        {
+          path: "user",
+          loader: protectedLoader,
+            Component: CreateUser,
+
+        },
+      ],
+    },
+   
+    {
+      path: "*",
+      Component: ErrorPage,
+
+    },
+  ]);
+  
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <RouterProvider router={router} fallbackElement={<Loading />} />
   );
 }
 
-export default App;
+
+
+function protectedLoader({ request }) {
+  const token = localStorage.getItem("token");
+  if (token) {
+    return null;
+  } else {
+    let params = new URLSearchParams();
+    params.set("from", new URL(request.url).pathname);
+    return redirect("/login?" + params.toString());
+  }
+}
+
+
+
+
+
+
+
+
