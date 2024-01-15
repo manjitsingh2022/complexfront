@@ -15,6 +15,7 @@ function login(email, password) {
   return fetch(`${config.apiUrl}/users/login/`, requestOptions)
     .then(handleResponse)
     .then((user) => {
+      console.log(user,'userrrrrrrr')
       return user;
     });
 }
@@ -28,6 +29,8 @@ function register(name, email, password, role) {
   return fetch(`${config.apiUrl}/users/register/`, requestOptions)
     .then(handleResponse)
     .then((user) => {
+
+      console.log(user,'userrrrrrrr')
       return user;
     });
 }
